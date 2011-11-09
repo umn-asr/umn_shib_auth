@@ -34,16 +34,20 @@ module UmnShibAuth
     end
  
     def shib_logout_url
-      "https://#{request.host}/Shibboleth.sso/Logout"
+      if request.env['Shib-Identity-Provider'].to_s.match(/idp-test.shib.umn.edu/)
+        redirect_url='https://www-test.umn.edu/logout'
+      else
+        redirect_url='https://umn.edu/logout'
+      end
+      encoded_redirect_url = ERB::Util.url_encode(redirect_url)
+      "https://#{request.host}/Shibboleth.sso/Logout?return=#{encoded_redirect_url}"
     end
 
+    # Warning: This function is dangerous,
+    # use shib_logout_url if you can.
+    #
     def shib_logout_and_redirect_url(redirect_url=nil)
-      # CONTINUE HERE by redirecting to /logout.
-      # if require.env['Shib-Identity-Provider'].to_s.match(/idp-test.shib.umn.edu/)
-      #   ='https://www-test.umn.edu/logout'
-      # else
-      #   encoded_redirect_url='https://www-test.umn.edu/logout'
-      # end
+      logger.warn "WARNING: shib_logout_and_redirect_url is a dangerous function with Shibboleth because it does not log the user out of the IDP, consider using shib_logout_url"
       redirect_url ||= request.url
       encoded_redirect_url = ERB::Util.url_encode(redirect_url)
       "https://#{request.host}/Shibboleth.sso/Logout?return=#{encoded_redirect_url}"
