@@ -1,10 +1,13 @@
 About
 ============
-UmnShibAuth is an authentication plugin for Rails designed to replace the existing UmnAuth x500 plugin for use with Shibboleth.  This plugin should work for all versions of rails--it's been used in Rails 2 and 3.
+UmnShibAuth is an authentication gem for Rails designed to replace the existing UmnAuth x500 plugin for use with Shibboleth.  This plugin should work for all versions of rails--it's been used in Rails 2 and 3.
 
 Installation
 ============
-Snag the code and drop it into `vendor/plugins/umn_shib_auth`
+Snag the code and drop it into `lib/umn_shib_auth`, then add a reference
+to it in your Gemfile:
+
+    gem 'umn_shib_auth', :path => 'lib/umn_shib_auth'
 
 Usage
 =====
