@@ -2,7 +2,10 @@ module UmnShibAuth
   require 'umn_shib_auth/session'
   require 'umn_shib_auth/controller_methods'
 
+  mattr_accessor :eppn_variable
+
   def self.set_global_defaults!
+    self.eppn_variable = 'eppn'
   end
   
   @@masquerade_mappings ||= nil
@@ -45,4 +48,6 @@ module UmnShibAuth
     end
     @@session_stub
   end
+
+  self.set_global_defaults!
 end

@@ -24,6 +24,21 @@ In your controller:
 
     before_filter :umn_auth_required
 
+Proxied HTTP headers
+--------------------
+
+You can tell umn_shib_auth which variable has the EPPN value if it's not
+the default, `request.env('eppn')`. This is useful when using Torquebox or
+anytime `ShibUseHeaders On` is enabled in your apache config.
+
+Simply create an intializer and set `UmnShibAuth.eppn_variable` to
+whatever your setup requires. If you're using Torquebox, you'll probably
+want to use something like this:
+
+    # config/initializers/umn_shib_auth.rb
+    # Use the shibboleth eppn forwarded by apache
+    UmnShibAuth.eppn_variable = 'HTTP_EPPN'
+
 Migrating
 =========
 If you were using some flavor of the old UmnAuth filter
