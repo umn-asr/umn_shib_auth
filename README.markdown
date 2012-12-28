@@ -22,7 +22,7 @@ In your views:
 
 In your controller:
 
-    before_filter :umn_auth_required
+    before_filter :shib_umn_auth_required
 
 Proxied HTTP headers
 --------------------
