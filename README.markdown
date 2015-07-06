@@ -4,10 +4,9 @@ UmnShibAuth is an authentication gem for Rails designed to replace the existing 
 
 Installation
 ============
-Snag the code and drop it into `lib/umn_shib_auth`, then add a reference
-to it in your Gemfile:
+Add a reference to umn_shib_auth in your Gemfile:
 
-    gem 'umn_shib_auth', :path => 'lib/umn_shib_auth'
+    gem 'umn_shib_auth', git: 'git@github.umn.edu:asrweb/umn_shib_auth'
 
 Usage
 =====
