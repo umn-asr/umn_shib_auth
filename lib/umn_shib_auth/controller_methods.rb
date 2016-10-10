@@ -34,12 +34,12 @@ module UmnShibAuth
       encoded_redirect_url = ERB::Util.url_encode(redirect_url)
       "https://#{request.host}/Shibboleth.sso/Login?target=#{encoded_redirect_url}"
     end
- 
+
     def shib_logout_url
-      if request.env['Shib-Identity-Provider'].to_s.match(/idp-test.shib.umn.edu/)
-        redirect_url='https://idp-test.shib.umn.edu/idp/LogoutUMN'
+      if request.env['Shib-Identity-Provider'].to_s.match(/login-test.umn.edu/)
+        redirect_url='https://login-test.umn.edu/idp/profile/Logout'
       else
-        redirect_url='https://idp2.shib.umn.edu/idp/LogoutUMN'
+        redirect_url='https://login.umn.edu/idp/profile/Logout'
       end
       encoded_redirect_url = ERB::Util.url_encode(redirect_url)
       "https://#{request.host}/Shibboleth.sso/Logout?return=#{encoded_redirect_url}"
