@@ -54,9 +54,9 @@ module UmnShibAuth
       encoded_redirect_url = ERB::Util.url_encode(redirect_url)
       "https://#{request.host}/Shibboleth.sso/Logout?return=#{encoded_redirect_url}"
     end
-    
+
     # This is a before_filter designed to replace the :umn_auth_required
-    # from the x500 UmnAuth tool. 
+    # from the x500 UmnAuth tool.
     # Since we are expecting the web server to be propogating the logged in user variable
     # this simply tells the user that there was an error.
     # Its a safety precaution
@@ -74,7 +74,7 @@ module UmnShibAuth
       s='<ul>'
       request.env.each_pair do |key,val|
         s += "<li><strong>#{key}:</strong> #{val}</li>"
-      end 
+      end
       s+='</ul>'
       s
     end
