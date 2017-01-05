@@ -35,6 +35,22 @@ RSpec.describe UmnShibAuth do
       end
     end
 
+    context "ENV[STUB_INTERNET_ID] is set and file has the correct text with a trailing newline" do
+      before do
+        ENV["STUB_INTERNET_ID"] = rand(1..999).to_s
+        File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub\n", mode: "w+")
+      end
+
+      after do
+        ENV.delete("STUB_INTERNET_ID")
+        FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
+      end
+
+      it "returns true" do
+        expect(described_class.using_stub_internet_id?).to be true
+      end
+    end
+
     context "ENV[STUB_INTERNET_ID] is set and file is NOT set" do
       before do
         ENV["STUB_INTERNET_ID"] = rand(1..999).to_s

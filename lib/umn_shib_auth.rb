@@ -34,7 +34,7 @@ module UmnShibAuth
 
   def self.stubbing_enabled?
     File.exist?(ENABLE_STUB_FILE) &&
-      File.read(ENABLE_STUB_FILE) == "I Want To Stub"
+      File.read(ENABLE_STUB_FILE).strip == "I Want To Stub"
   end
 
   def self.stub_internet_id
