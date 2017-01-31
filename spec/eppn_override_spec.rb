@@ -9,7 +9,7 @@ RSpec.describe "EPPN Override" do
 
   before do
     UmnShibAuth.eppn_variable = eppn_var
-    allow(env_stub).to receive(:env).and_return({ eppn_var => eppn })
+    allow(env_stub).to receive(:env).and_return(eppn_var => eppn)
     allow(controller).to receive(:request).and_return(env_stub)
   end
 
