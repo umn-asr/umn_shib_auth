@@ -64,9 +64,13 @@ module UmnShibAuth
     def shib_umn_auth_required
       return true if UmnShibAuth.using_stub_internet_id?
       if shib_umn_session.nil?
-        redirect_to shib_login_and_redirect_url and return false
+        if request.xml_http_request?
+          render js: "window.location.replace('#{shib_login_and_redirect_url}');" and return false
+        else
+          redirect_to shib_login_and_redirect_url and return false
+        end
       else
-        return true
+        true
       end
     end
 
