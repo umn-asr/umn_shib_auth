@@ -50,5 +50,16 @@ new code like follows
     # include UmnAuth::ControllerMethods
     include UmnShibAuth::ReplacementForUmnAuthControllerMethods
 
+Development
+======
+
+- Fork the repo
+- `./script/setup`
+
+Scripts
+======
+- `./script/setup` installs dependencies
+- `./script/test` runs the tests
+- `./script/update` updates dependencies
 
 Copyright (c) 2011 Regents of the University of Minnesota
