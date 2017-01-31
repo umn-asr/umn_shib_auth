@@ -1,0 +1,17 @@
+language: ruby
+
+rvm:
+  - 2.1.4
+  - 2.2.5
+  - 2.3.3
+
+gemfile:
+  - gemfiles/Gemfile.rails4.0
+  - gemfiles/Gemfile.rails4.1
+  - gemfiles/Gemfile.rails4.2
+  - gemfiles/Gemfile.rails5.0
+
+matrix:
+  exclude:
+    - rvm: 2.1.4
+      gemfile: gemfiles/Gemfile.rails5.0
