@@ -24,4 +24,10 @@ end
 
 class DummyController < ActionController::Base
   include UmnShibAuth::ControllerMethods
+
+  # In a real Rails app that has a root route defined, this method exists
+  # But in our test setup, we don't have have this part of Rails configured.
+  # Rspec won't let us double a method that doesn't exist
+  # So we make this method exist just for our test controller
+  def root_path; end
 end
