@@ -10,6 +10,8 @@ Add a reference to umn_shib_auth in your Gemfile:
 
 Usage
 =====
+In your routes, define a [root route](http://guides.rubyonrails.org/routing.html#using-root)
+
 In application_controller.rb:
 
     include UmnShibAuth::ControllerMethods
@@ -22,6 +24,23 @@ In your views:
 In your controller:
 
     before_filter :shib_umn_auth_required
+
+Behavior
+=====
+
+If an un-authenticated user makes a request, they will be redirected (status code 302) to 
+
+    https://yourapp.umn.edu/Shibboleth.sso/Login?target=https://yourapp.umn.edu/whatever_url_they_requested
+
+If the request is an Ajax/XHR request (as defined by Rails' [`xml_http_request?`](http://api.rubyonrails.org/classes/ActionDispatch/Request.html#method-i-xml_http_request-3F) method), then the behavior is slightly different. Instead of a 302 Redirect, the user will receive some javascript that changes their browser location to
+
+    https://yourapp.umn.edu/Shibboleth.sso/Login?target=https://yourapp.umn.edu/your_root_route
+
+The behavior of the gem differs because the behavior of these two requests is not the same. 
+
+In the case of a non-XHR request, shib will redirect the user to their originally-requested URL. This is fine, as that request was already a normal HTTP request and should work as expected.
+
+But in the case of an XHR request we can not redirect the user to the same URL again. It will not behave the same because the redirect will be missing the "XMLHttpRequest" header that Rails relies on.
 
 Proxied HTTP headers
 --------------------
