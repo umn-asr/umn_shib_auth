@@ -69,6 +69,19 @@ new code like follows
     # include UmnAuth::ControllerMethods
     include UmnShibAuth::ReplacementForUmnAuthControllerMethods
 
+Stubbing the current user in development
+======
+
+During development, it's nice to be able to stub which user is currently logged
+in (short circuit the typical trip to the service provider). To do this, two
+mechanisms are required:
+
+1. Create a file, `~/.umn_shib_auth_enable_stub` with the content `I Want To Stub`.
+1. Start your rails server with the environment variable `STUB_INTERNET_ID` set to the username you want to impersonate.
+
+Both of these mechanisms are meant to be safeguards to ensure this behavior is not
+enabled in production environments.
+
 Development
 ======
 
