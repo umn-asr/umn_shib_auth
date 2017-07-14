@@ -112,4 +112,38 @@ RSpec.describe UmnShibAuth::ControllerMethods do
       end
     end
   end
+
+  describe "redirect_to_shib_login" do
+    before do
+      allow(request_double).to receive(:url).and_return("https://google.com")
+      allow(request_double).to receive(:host).and_return("secret.umn.edu")
+      allow(request_double).to receive(:env).and_return({})
+      allow(controller).to receive(:request).and_return(request_double)
+    end
+
+    context "the request is not an ajax request" do
+      before do
+        allow(request_double).to receive(:xml_http_request?).and_return(false)
+        @login_url = "https://secret.umn.edu/Shibboleth.sso/Login?target=#{ERB::Util.url_encode('https://google.com')}"
+      end
+
+      it "redirects and returns false" do
+        expect(controller).to receive(:redirect_to).with(@login_url)
+        expect(controller.redirect_to_shib_login).to be_falsey
+      end
+    end
+
+    context "and the request is an ajax request" do
+      before do
+        allow(request_double).to receive(:xml_http_request?).and_return(true)
+        expect(controller).to receive(:root_path).and_return("https://app.umn.edu")
+        @login_url = "https://secret.umn.edu/Shibboleth.sso/Login?target=#{ERB::Util.url_encode('https://app.umn.edu')}"
+      end
+
+      it "renders javascript that will change the window location to the correct shib login" do
+        expect(controller).to receive(:render).with(js: "window.location.replace('#{@login_url}');")
+        expect(controller.redirect_to_shib_login).to be_falsey
+      end
+    end
+  end
 end
