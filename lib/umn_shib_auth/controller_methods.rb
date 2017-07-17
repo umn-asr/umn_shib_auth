@@ -6,22 +6,20 @@ module UmnShibAuth
           helper_method :shib_login_and_redirect_url, :shib_logout_and_redirect_url, :shib_logout_url, :shib_umn_session, :shib_debug_env_vars
         end
       end
-      if UmnShibAuth.using_stub_internet_id?
-        Rails.logger.info "[umn_shib_auth] ENV['STUB_INTERNET_ID'] detected, shib_umn_session will be stubbed with internet_id=#{UmnShibAuth.stub_internet_id} for all requests.
+
+      return unless UmnShibAuth.using_stub_internet_id?
+      Rails.logger.info "[umn_shib_auth] ENV['STUB_INTERNET_ID'] detected, shib_umn_session will be stubbed with internet_id=#{UmnShibAuth.stub_internet_id} for all requests.
               You can also hit this in the console via UmnShibAuth.session_stub
         "
-      end
     end
 
     def shib_umn_session
       if UmnShibAuth.using_stub_internet_id?
         @shib_umn_session ||= UmnShibAuth::Session.new(eppn: UmnShibAuth.stub_internet_id)
+      elsif request.env[UmnShibAuth.eppn_variable].blank?
+        @shib_umn_session = nil
       else
-        if request.env[UmnShibAuth.eppn_variable].blank?
-          @shib_umn_session = nil
-        else
-          @shib_umn_session ||= UmnShibAuth::Session.new(eppn: request.env[UmnShibAuth.eppn_variable])
-        end
+        @shib_umn_session ||= UmnShibAuth::Session.new(eppn: request.env[UmnShibAuth.eppn_variable])
       end
       @shib_umn_session
     end
@@ -36,11 +34,11 @@ module UmnShibAuth
     end
 
     def shib_logout_url
-      if request.env['Shib-Identity-Provider'].to_s.match(/login-test.umn.edu/)
-        redirect_url='https://login-test.umn.edu/idp/profile/Logout'
-      else
-        redirect_url='https://login.umn.edu/idp/profile/Logout'
-      end
+      redirect_url = if /login-test.umn.edu/ =~ request.env['Shib-Identity-Provider'].to_s
+                       'https://login-test.umn.edu/idp/profile/Logout'
+                     else
+                       'https://login.umn.edu/idp/profile/Logout'
+                     end
       encoded_redirect_url = ERB::Util.url_encode(redirect_url)
       "https://#{request.host}/Shibboleth.sso/Logout?return=#{encoded_redirect_url}"
     end
