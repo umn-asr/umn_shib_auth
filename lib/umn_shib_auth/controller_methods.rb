@@ -63,16 +63,25 @@ module UmnShibAuth
     #
     def shib_umn_auth_required
       return true if UmnShibAuth.using_stub_internet_id?
+
       if shib_umn_session.nil?
-        if request.xml_http_request?
-          render js: "window.location.replace('#{shib_login_and_redirect_url(root_path)}');" and return false
-        else
-          redirect_to shib_login_and_redirect_url and return false
-        end
+        redirect_to_shib_login
       else
         true
       end
     end
+
+    # rubocop:disable Style/AndOr
+    # disabling cop because `and` is idiomatic when returning in a controller
+    # so the controller halts
+    def redirect_to_shib_login
+      if request.xml_http_request?
+        render js: "window.location.replace('#{shib_login_and_redirect_url(root_path)}');" and return false
+      else
+        redirect_to shib_login_and_redirect_url and return false
+      end
+    end
+    # rubocop:enable Style/AndOr
 
     def shib_debug_env_vars
       s = '<ul>'
