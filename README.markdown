@@ -8,6 +8,14 @@ Add a reference to umn_shib_auth in your Gemfile:
 
     gem 'umn_shib_auth', git: 'git@github.umn.edu:asrweb/umn_shib_auth'
 
+If you want access to `display_name` or `emplid` from shibboleth, you will need to:
+1) be using the `apache_mod_shib` role in ansible, and
+2) update your ansible configuration's group_vars to include:
+```
+apache_mod_shib_display_name: true
+apache_mod_shib_employee_number: true
+```
+
 Usage
 =====
 In your routes, define a [root route](http://guides.rubyonrails.org/routing.html#using-root)
@@ -24,6 +32,11 @@ In your views:
 In your controller:
 
     before_filter :shib_umn_auth_required
+
+To access the shibboleth provided metadata, use one of `shib_umn_session.internet_id`, `shib_umn_session.emplid`, or `shib_umn_session.display_name`.  Ex:
+```
+<p>My name is <%= shib_umn_session.display_name %></p>
+```
 
 Behavior
 =====
@@ -45,8 +58,8 @@ But in the case of an XHR request we can not redirect the user to the same URL a
 Proxied HTTP headers
 --------------------
 
-You can tell umn_shib_auth which variable has the EPPN value if it's not
-the default, `request.env('eppn')`. This is useful when using Torquebox or
+You can tell umn_shib_auth which variable has the EPPN value (or other shibboleth provided values) if they are not
+the defaults (ex: `request.env('eppn')`). This is useful when using Torquebox or
 anytime `ShibUseHeaders On` is enabled in your apache config.
 
 Simply create an intializer and set `UmnShibAuth.eppn_variable` to
@@ -56,6 +69,8 @@ want to use something like this:
     # config/initializers/umn_shib_auth.rb
     # Use the shibboleth eppn forwarded by apache
     UmnShibAuth.eppn_variable = 'HTTP_EPPN'
+    UmnShibAuth.emplid_variable = 'HTTP_EMPLID'
+    UmnShibAuth.display_name_variable = 'HTTP_NAME'
 
 Migrating
 =========
@@ -77,7 +92,7 @@ in (short circuit the typical trip to the service provider). To do this, two
 mechanisms are required:
 
 1. Create a file, `~/.umn_shib_auth_enable_stub` with the content `I Want To Stub`.
-1. Start your rails server with the environment variable `STUB_INTERNET_ID` set to the username you want to impersonate.
+2. Start your rails server with the environment variable `STUB_INTERNET_ID` set to the username you want to impersonate.  If you are getting emplid or display_name from shibboleth, you can also set the environment variables `STUB_EMPLID` and `STUB_DISPLAY_NAME`.
 
 Both of these mechanisms are meant to be safeguards to ensure this behavior is not
 enabled in production environments.

@@ -2,12 +2,16 @@ module UmnShibAuth
   require 'umn_shib_auth/session'
   require 'umn_shib_auth/controller_methods'
 
+  class StubbingNotEnabled < StandardError; end
+
   ENABLE_STUB_FILE = File.join(ENV['HOME'], ".umn_shib_auth_enable_stub").freeze
 
-  mattr_accessor :eppn_variable
+  mattr_accessor :eppn_variable, :emplid_variable, :display_name_variable
 
   def self.set_global_defaults!
     self.eppn_variable = 'eppn'
+    self.emplid_variable = 'umnEmplId'
+    self.display_name_variable = 'displayName'
   end
 
   @masquerade_mappings ||= nil
@@ -37,8 +41,18 @@ module UmnShibAuth
   end
 
   def self.stub_internet_id
-    raise "Boom" unless using_stub_internet_id?
+    raise StubbingNotEnabled unless using_stub_internet_id?
     ENV['STUB_INTERNET_ID'] || ENV['STUB_X500']
+  end
+
+  def self.stub_emplid
+    raise StubbingNotEnabled unless using_stub_internet_id?
+    ENV['STUB_EMPLID']
+  end
+
+  def self.stub_display_name
+    raise StubbingNotEnabled unless using_stub_internet_id?
+    ENV['STUB_DISPLAY_NAME']
   end
 
   @session_stub = nil
