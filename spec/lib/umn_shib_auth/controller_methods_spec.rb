@@ -1,15 +1,22 @@
 require_relative "../../spec_helper"
+require 'securerandom'
 
 RSpec.describe UmnShibAuth::ControllerMethods do
   let(:request_double) { instance_double(ActionDispatch::Request) }
-  let(:controller)  { DummyController.new }
-  let(:eppn_var)    { 'HTTP_EPPN' }
-  let(:internet_id) { 'asdf' }
-  let(:eppn)        { "#{internet_id}@blah.edu" }
-  let(:env_double)  { { eppn_var => eppn } }
+  let(:controller)     { DummyController.new }
+  let(:eppn_var)       { 'HTTP_EPPN' }
+  let(:internet_id)    { 'asdf' }
+  let(:eppn)           { "#{internet_id}@blah.edu" }
+  let(:emplid)         { rand(10**7).to_s.rjust(7, '0') }
+  let(:emplid_var)     { 'HTTP_EMPLOYEENUMBER' }
+  let(:display_name)   { SecureRandom.hex }
+  let(:name_var)       { 'HTTP_DISPLAYNAME' }
+  let(:env_double)     { { eppn_var => eppn, emplid_var => emplid, name_var => display_name } }
 
   before do
     UmnShibAuth.eppn_variable = eppn_var
+    UmnShibAuth.emplid_variable = emplid_var
+    UmnShibAuth.display_name_variable = name_var
     allow(request_double).to receive(:xml_http_request?).and_return(false)
   end
 
@@ -22,6 +29,26 @@ RSpec.describe UmnShibAuth::ControllerMethods do
     it "overrides default eppn var" do
       expect(controller.shib_umn_session).to be_kind_of(UmnShibAuth::Session)
       expect(controller.shib_umn_session.internet_id).to eq internet_id
+      expect(controller.shib_umn_session.emplid).to eq emplid
+      expect(controller.shib_umn_session.display_name).to eq display_name
+    end
+  end
+
+  describe "shib_umn_session" do
+    describe "stub session in use" do
+      before do
+        allow(UmnShibAuth).to receive(:using_stub_internet_id?).and_return(true)
+        ENV['STUB_INTERNET_ID'] = internet_id
+        ENV['STUB_EMPLID'] = emplid
+        ENV['STUB_DISPLAY_NAME'] = display_name
+      end
+
+      it "should return a session with all values set" do
+        expect(controller.shib_umn_session).to be_kind_of(UmnShibAuth::Session)
+        expect(controller.shib_umn_session.internet_id).to eq internet_id
+        expect(controller.shib_umn_session.emplid).to eq emplid
+        expect(controller.shib_umn_session.display_name).to eq display_name
+      end
     end
   end
 

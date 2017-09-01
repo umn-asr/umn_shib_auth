@@ -15,13 +15,25 @@ module UmnShibAuth
 
     def shib_umn_session
       if UmnShibAuth.using_stub_internet_id?
-        @shib_umn_session ||= UmnShibAuth::Session.new(eppn: UmnShibAuth.stub_internet_id)
+        @shib_umn_session ||= stubbed_session
       elsif request.env[UmnShibAuth.eppn_variable].blank?
         @shib_umn_session = nil
       else
-        @shib_umn_session ||= UmnShibAuth::Session.new(eppn: request.env[UmnShibAuth.eppn_variable])
+        @shib_umn_session ||= authorized_session
       end
       @shib_umn_session
+    end
+
+    def stubbed_session
+      UmnShibAuth::Session.new(eppn: UmnShibAuth.stub_internet_id,
+                               emplid: UmnShibAuth.stub_emplid,
+                               display_name: UmnShibAuth.stub_display_name)
+    end
+
+    def authorized_session
+      UmnShibAuth::Session.new(eppn: request.env[UmnShibAuth.eppn_variable],
+                               emplid: request.env[UmnShibAuth.emplid_variable],
+                               display_name: request.env[UmnShibAuth.display_name_variable])
     end
 
     ###############
