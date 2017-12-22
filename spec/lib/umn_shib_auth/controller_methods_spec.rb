@@ -18,6 +18,7 @@ RSpec.describe UmnShibAuth::ControllerMethods do
     UmnShibAuth.emplid_variable = emplid_var
     UmnShibAuth.display_name_variable = name_var
     allow(request_double).to receive(:xml_http_request?).and_return(false)
+    allow(UmnShibAuth).to receive(:stubbing_enabled?).and_return(false)
   end
 
   describe "A proxied shib app" do

@@ -4,8 +4,6 @@ module UmnShibAuth
 
   class StubbingNotEnabled < StandardError; end
 
-  ENABLE_STUB_FILE = File.join(ENV['HOME'], ".umn_shib_auth_enable_stub").freeze
-
   mattr_accessor :eppn_variable, :emplid_variable, :display_name_variable
 
   def self.set_global_defaults!
@@ -36,8 +34,7 @@ module UmnShibAuth
   end
 
   def self.stubbing_enabled?
-    File.exist?(ENABLE_STUB_FILE) &&
-      File.read(ENABLE_STUB_FILE).strip == "I Want To Stub"
+    ["development", "test"].include?(Rails.env)
   end
 
   def self.stub_internet_id
