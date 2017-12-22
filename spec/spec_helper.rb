@@ -25,11 +25,12 @@ end
 
 class Rails
   class << self
-    attr_accessor :logger
+    attr_accessor :logger, :env
   end
 end
 
 Rails.logger = Logger.new("/dev/null")
+Rails.env = "test"
 
 class DummyController < ActionController::Base
   include UmnShibAuth::ControllerMethods
