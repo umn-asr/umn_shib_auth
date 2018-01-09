@@ -88,14 +88,15 @@ Stubbing the current user in development
 ======
 
 During development, it's nice to be able to stub which user is currently logged
-in (short circuit the typical trip to the service provider). To do this, two
-mechanisms are required:
+in (short circuit the typical trip to the service provider). To do this, start
+your rails server with the environment variable `STUB_INTERNET_ID` set to the
+username you want to impersonate.
 
-1. Create a file, `~/.umn_shib_auth_enable_stub` with the content `I Want To Stub`.
-2. Start your rails server with the environment variable `STUB_INTERNET_ID` set to the username you want to impersonate.  If you are getting emplid or display_name from shibboleth, you can also set the environment variables `STUB_EMPLID` and `STUB_DISPLAY_NAME`.
+If you are getting emplid or display_name from shibboleth, you can also set the
+environment variables `STUB_EMPLID` and `STUB_DISPLAY_NAME`.
 
-Both of these mechanisms are meant to be safeguards to ensure this behavior is not
-enabled in production environments.
+Both of these mechanisms only work in development and test environments to
+prevent this behavior accidentally being triggered in production environments.
 
 Development
 ======

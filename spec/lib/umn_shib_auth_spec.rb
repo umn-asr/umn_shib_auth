@@ -17,80 +17,31 @@ RSpec.describe UmnShibAuth do
   end
 
   describe ".using_stub_internet_id?" do
-    context "ENV[STUB_INTERNET_ID] is set and file is set properly" do
+    context "ENV[STUB_INTERNET_ID] is set'" do
       before do
         ENV["STUB_INTERNET_ID"] = rand(1..999).to_s
-        File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub", mode: "w+")
       end
 
       after do
         ENV.delete("STUB_INTERNET_ID")
-        FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
       end
 
-      it "returns true" do
+      it "allows stubbing in the development environment" do
+        allow(Rails).to receive(:env).and_return("development")
         expect(described_class.using_stub_internet_id?).to be true
       end
-    end
 
-    context "ENV[STUB_INTERNET_ID] is set and file has the wrong text" do
-      before do
-        ENV["STUB_INTERNET_ID"] = rand(1..999).to_s
-        File.write(UmnShibAuth::ENABLE_STUB_FILE, "Stubbing? Eh.", mode: "w+")
-      end
-
-      after do
-        ENV.delete("STUB_INTERNET_ID")
-        FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
-      end
-
-      it "returns false" do
-        expect(described_class.using_stub_internet_id?).to be false
-      end
-    end
-
-    context "ENV[STUB_INTERNET_ID] is set and file has the correct text with a trailing newline" do
-      before do
-        ENV["STUB_INTERNET_ID"] = rand(1..999).to_s
-        File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub\n", mode: "w+")
-      end
-
-      after do
-        ENV.delete("STUB_INTERNET_ID")
-        FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
-      end
-
-      it "returns true" do
+      it "allows stubbing in the test environment" do
         expect(described_class.using_stub_internet_id?).to be true
       end
-    end
 
-    context "ENV[STUB_INTERNET_ID] is set and file is NOT set" do
-      before do
-        ENV["STUB_INTERNET_ID"] = rand(1..999).to_s
-        FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE) if File.exist?(UmnShibAuth::ENABLE_STUB_FILE)
-      end
-
-      after do
-        ENV.delete("STUB_INTERNET_ID")
-      end
-
-      it "returns false" do
+      it "disallows stubbing in the production environment" do
+        allow(Rails).to receive(:env).and_return("production")
         expect(described_class.using_stub_internet_id?).to be false
       end
-    end
 
-    context "ENV[STUB_INTERNET_ID] is not set and file is set" do
-      before do
-        ENV.delete("STUB_INTERNET_ID")
-        File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub", mode: "w+")
-      end
-
-      after do
-        FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE) if File.exist?(UmnShibAuth::ENABLE_STUB_FILE)
-      end
-
-      it "returns false" do
+      it "disallows stubbing in the any non-test/dev environment" do
+        allow(Rails).to receive(:env).and_return("some_non_standard_env")
         expect(described_class.using_stub_internet_id?).to be false
       end
     end
@@ -110,107 +61,62 @@ RSpec.describe UmnShibAuth do
     end
 
     describe ".stub_internet_id" do
-      context "file is not set properly" do
-        before do
-          FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE) if File.exist?(UmnShibAuth::ENABLE_STUB_FILE)
-        end
-
-        it "raises an error" do
-          expect { described_class.stub_internet_id }.to raise_error(UmnShibAuth::StubbingNotEnabled)
-        end
+      it "raises an error in a non dev/test environment" do
+        allow(Rails).to receive(:env).and_return("production")
+        expect { described_class.stub_internet_id }.to raise_error(UmnShibAuth::StubbingNotEnabled)
       end
 
-      context "file is set properly" do
-        before do
-          File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub", mode: "w+")
-        end
-
-        after do
-          FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
-        end
-
-        it "returns stub internet id" do
-          expect(described_class.stub_internet_id).to eq(internet_id)
-        end
+      it "returns stub internet id in a dev/test environment" do
+        expect(described_class.stub_internet_id).to eq(internet_id)
       end
     end
 
     describe ".stub_emplid" do
-      context "file is not set properly" do
-        before do
-          FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE) if File.exist?(UmnShibAuth::ENABLE_STUB_FILE)
-        end
-
-        it "raises an error" do
-          expect { described_class.stub_emplid }.to raise_error(UmnShibAuth::StubbingNotEnabled)
-        end
+      it "raises an error in a non dev/test environment" do
+        allow(Rails).to receive(:env).and_return("production")
+        expect { described_class.stub_emplid }.to raise_error(UmnShibAuth::StubbingNotEnabled)
       end
 
-      context "file is set properly" do
+      it "returns stub internet id in a dev/test enviroment" do
+        expect(described_class.stub_emplid).to eq(emplid)
+      end
+
+      context "with blank stub emplid" do
         before do
-          File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub", mode: "w+")
+          ENV.delete("STUB_EMPLID")
         end
 
-        after do
-          FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
+        it "does not throw an error" do
+          expect { described_class.stub_emplid }.not_to raise_error
         end
 
-        it "returns stub internet id" do
-          expect(described_class.stub_emplid).to eq(emplid)
-        end
-
-        context "with blank stub emplid" do
-          before do
-            ENV.delete("STUB_EMPLID")
-          end
-
-          it "does not throw an error" do
-            expect { described_class.stub_emplid }.not_to raise_error
-          end
-
-          it "returns nil" do
-            expect(described_class.stub_emplid).to be_nil
-          end
+        it "returns nil" do
+          expect(described_class.stub_emplid).to be_nil
         end
       end
     end
 
     describe ".stub_display_name" do
-      context "file is not set properly" do
-        before do
-          FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE) if File.exist?(UmnShibAuth::ENABLE_STUB_FILE)
-        end
-
-        it "raises an error" do
-          expect { described_class.stub_display_name }.to raise_error(UmnShibAuth::StubbingNotEnabled)
-        end
+      it "raises an error in a non dev/test environment" do
+        allow(Rails).to receive(:env).and_return("staging")
+        expect { described_class.stub_display_name }.to raise_error(UmnShibAuth::StubbingNotEnabled)
       end
 
-      context "file is set properly" do
+      it "returns stub display name in a dev/test environment" do
+        expect(described_class.stub_display_name).to eq(display_name)
+      end
+
+      context "with blank stub display_name" do
         before do
-          File.write(UmnShibAuth::ENABLE_STUB_FILE, "I Want To Stub", mode: "w+")
+          ENV.delete("STUB_DISPLAY_NAME")
         end
 
-        after do
-          FileUtils.rm(UmnShibAuth::ENABLE_STUB_FILE)
+        it "does not throw an error" do
+          expect { described_class.stub_display_name }.not_to raise_error
         end
 
-        it "returns stub display name" do
-          expect(described_class.stub_display_name).to eq(display_name)
-        end
-
-        context "with blank stub display_name" do
-          before do
-            ENV.delete("STUB_DISPLAY_NAME")
-          end
-
-          it "does not throw an error" do
-            expect { described_class.stub_display_name }.not_to raise_error
-          end
-
-          it "returns nil" do
-            expect(described_class.stub_display_name).to be_nil
-          end
+        it "returns nil" do
+          expect(described_class.stub_display_name).to be_nil
         end
       end
     end

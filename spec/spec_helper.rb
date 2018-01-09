@@ -1,6 +1,7 @@
 require 'active_support/dependencies/autoload'
 require 'action_controller'
 require 'umn_shib_auth'
+require 'logger'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -21,6 +22,15 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 end
+
+class Rails
+  class << self
+    attr_accessor :logger, :env
+  end
+end
+
+Rails.logger = Logger.new("/dev/null")
+Rails.env = "test"
 
 class DummyController < ActionController::Base
   include UmnShibAuth::ControllerMethods
